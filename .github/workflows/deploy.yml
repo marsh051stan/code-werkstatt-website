@@ -2,17 +2,22 @@ name: Build and Deploy Static Site
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
 
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
@@ -24,76 +29,69 @@ jobs:
 
     - name: Build static site
       run: bun run build
+      env:
+        NODE_ENV: production
 
     - name: Verify build output
       run: |
-        echo "Checking build outputs..."
+        echo "Checking build output..."
         ls -la
         if [ -d "website" ]; then
           echo "✅ Website directory created successfully"
-          echo "📊 Website contents:"
+          echo "Contents:"
           ls -la website/
+          echo "Total files in website:"
+          find website -type f | wc -l
         else
-          echo "❌ Website directory not found"
+          echo "❌ Website directory not found!"
           exit 1
         fi
 
-    - name: Create deployment archive
+    - name: Create static site archive
       run: |
-        echo "Creating deployment archive..."
         cd website
         zip -r ../code-werkstatt-website.zip .
         cd ..
-        echo "📦 Archive created: code-werkstatt-website.zip"
-        ls -lh code-werkstatt-website.zip
+        echo "Archive created: $(ls -lh code-werkstatt-website.zip)"
 
-    - name: Generate release tag
-      id: tag
-      run: |
-        TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-        TAG_NAME="release-${TIMESTAMP}"
-        echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
-        echo "📅 Generated tag: ${TAG_NAME}"
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: static-website
+        path: code-werkstatt-website.zip
+        retention-days: 30
 
-    - name: Create GitHub Release
-      if: github.ref == 'refs/heads/main'
+    - name: Create Release (on main branch only)
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ steps.tag.outputs.tag }}
-        name: "Code Werkstatt Website - ${{ steps.tag.outputs.tag }}"
+        tag_name: release-${{ github.run_number }}
+        name: Code Werkstatt Website v${{ github.run_number }}
         body: |
-          🚀 **Automated Deployment**
+          🚀 **Автоматический релиз статического сайта Code Werkstatt**
 
-          Static website build generated from commit: ${{ github.sha }}
+          📅 **Дата сборки**: ${{ github.event.head_commit.timestamp }}
+          🔨 **Коммит**: ${{ github.sha }}
+          💬 **Сообщение**: ${{ github.event.head_commit.message }}
 
-          **📁 Contents:**
-          - Complete static website ready for hosting
-          - All assets, styles, and JavaScript included
-          - Optimized HTML with relative paths
-          - Mobile-responsive navigation functionality
+          ## 📦 Что включено:
+          - ✅ Статический сайт (HTML/CSS/JS)
+          - ✅ Все изображения и ресурсы
+          - ✅ Оптимизированный для хостинга
+          - ✅ Чистые URL без .html
+          - ✅ Мобильное меню
 
-          **🛠️ Deployment Instructions:**
-          1. Download the `code-werkstatt-website.zip` file
-          2. Extract to your web server directory
-          3. Point your domain to the extracted files
-          4. No server-side configuration needed
+          ## 🌐 Как использовать:
+          1. Скачайте `code-werkstatt-website.zip`
+          2. Распакуйте архив
+          3. Загрузите содержимое на ваш веб-хостинг
+          4. Готово! 🎉
 
-          **🔧 Build Details:**
-          - Next.js 15.3.2 static export
-          - Bun package manager
-          - Post-build optimization applied
-          - Generated: ${{ steps.tag.outputs.tag }}
+          ---
+          Автоматически создано GitHub Actions 🤖
         files: |
           code-werkstatt-website.zip
         draft: false
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload artifact for PR builds
-      if: github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v4
-      with:
-        name: website-preview-${{ github.event.number }}
-        path: code-werkstatt-website.zip
-        retention-days: 30
