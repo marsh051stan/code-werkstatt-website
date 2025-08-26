@@ -1,0 +1,49 @@
+[images]
+  remote_images = ["https://source.unsplash.com/.*", "https://images.unsplash.com/.*", "https://ext.same-assets.com/.*", "https://ugc.same-assets.com/.*"]
+
+[build]
+  command = "bun run build && node scripts/post-build.js"
+  publish = "website"
+
+[[redirects]]
+  from = "/blog"
+  to = "/blog.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/typische-fehler-im-it-vorstellungsgespraech"
+  to = "/blog/typische-fehler-im-it-vorstellungsgespraech.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/effiziente-programmierkurse-schweiz-ueberblick"
+  to = "/blog/effiziente-programmierkurse-schweiz-ueberblick.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/effiziente-wege-programmierungserziehung-schweiz"
+  to = "/blog/effiziente-wege-programmierungserziehung-schweiz.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/effektive-programmierkurse-schweiz-fortschritt"
+  to = "/blog/effektive-programmierkurse-schweiz-fortschritt.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/entfaltung-digitaler-talente-schweiz"
+  to = "/blog/entfaltung-digitaler-talente-schweiz.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog/schluesselstrategien-erfolg-programmierkursen"
+  to = "/blog/schluesselstrategien-erfolg-programmierkursen.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404
+
+[build.environment]
+  NODE_VERSION = "18"

@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-primary: #FF33A1;
+  --brand-primary-light: #ff66b8;
+  --brand-primary-dark: #e6007a;
+  --dark-blue: #1e2a3a;
+  --light-gray: #f8f9fa;
+  --medium-gray: #6c757d;
+}
+
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+.brand-primary {
+  color: var(--brand-primary);
+}
+
+.bg-brand-primary {
+  background-color: var(--brand-primary);
+}
+
+.border-brand-primary {
+  border-color: var(--brand-primary);
+}
+
+.hover\:bg-brand-primary-light:hover {
+  background-color: var(--brand-primary-light);
+}
+
+.bg-dark-blue {
+  background-color: var(--dark-blue);
+}
+
+.text-dark-blue {
+  color: var(--dark-blue);
+}
+
+/* Flat design - no shadows */
+.shadow-none {
+  box-shadow: none !important;
+}
+
+.no-shadow * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Button contrast enforcement */
+.btn-primary {
+  background-color: var(--brand-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-primary-dark);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--dark-blue);
+  border: 2px solid var(--dark-blue);
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--dark-blue);
+  color: white;
+}
+
+/* Mobile menu hidden by default */
+.mobile-menu-hidden {
+  display: none;
+}
+
+/* Responsive grid */
+.grid-responsive {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

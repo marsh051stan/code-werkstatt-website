@@ -1,0 +1,99 @@
+name: Build and Deploy Static Site
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      run: bun install
+
+    - name: Build static site
+      run: bun run build
+
+    - name: Verify build output
+      run: |
+        echo "Checking build outputs..."
+        ls -la
+        if [ -d "website" ]; then
+          echo "✅ Website directory created successfully"
+          echo "📊 Website contents:"
+          ls -la website/
+        else
+          echo "❌ Website directory not found"
+          exit 1
+        fi
+
+    - name: Create deployment archive
+      run: |
+        echo "Creating deployment archive..."
+        cd website
+        zip -r ../code-werkstatt-website.zip .
+        cd ..
+        echo "📦 Archive created: code-werkstatt-website.zip"
+        ls -lh code-werkstatt-website.zip
+
+    - name: Generate release tag
+      id: tag
+      run: |
+        TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+        TAG_NAME="release-${TIMESTAMP}"
+        echo "tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+        echo "📅 Generated tag: ${TAG_NAME}"
+
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: "Code Werkstatt Website - ${{ steps.tag.outputs.tag }}"
+        body: |
+          🚀 **Automated Deployment**
+
+          Static website build generated from commit: ${{ github.sha }}
+
+          **📁 Contents:**
+          - Complete static website ready for hosting
+          - All assets, styles, and JavaScript included
+          - Optimized HTML with relative paths
+          - Mobile-responsive navigation functionality
+
+          **🛠️ Deployment Instructions:**
+          1. Download the `code-werkstatt-website.zip` file
+          2. Extract to your web server directory
+          3. Point your domain to the extracted files
+          4. No server-side configuration needed
+
+          **🔧 Build Details:**
+          - Next.js 15.3.2 static export
+          - Bun package manager
+          - Post-build optimization applied
+          - Generated: ${{ steps.tag.outputs.tag }}
+        files: |
+          code-werkstatt-website.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload artifact for PR builds
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: website-preview-${{ github.event.number }}
+        path: code-werkstatt-website.zip
+        retention-days: 30
